@@ -1,0 +1,265 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - バドミントン大会サーチ{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- ヘロセクション -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="bg-primary text-white rounded p-5 text-center">
+                <h1 class="display-4 fw-bold mb-3">
+                    <i class="bi bi-trophy"></i> バドミントン大会を見つけよう
+                </h1>
+                <p class="lead mb-4">全国のバドミントン大会情報から、あなたにぴったりの大会を検索できます。</p>
+                
+                <!-- 簡単検索フォーム -->
+                <form method="get" class="row g-2 justify-content-center">
+                    <div class="col-md-8">
+                        <input type="text" name="q" class="form-control form-control-lg" 
+                               placeholder="大会名、会場名、地域名で検索..." 
+                               value="{{ request.GET.q }}">
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-light btn-lg w-100">
+                            <i class="bi bi-search"></i> 検索
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 統計情報 -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="bi bi-trophy text-primary" style="font-size: 2rem;"></i>
+                    <h3 class="mt-2">{{ total_tournaments }}</h3>
+                    <p class="text-muted mb-0">登録大会数</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="bi bi-calendar-event text-success" style="font-size: 2rem;"></i>
+                    <h3 class="mt-2">{{ upcoming_tournaments }}</h3>
+                    <p class="text-muted mb-0">開催予定大会</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- フィルター -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-funnel"></i> 絞り込み検索
+                        <button class="btn btn-sm btn-outline-primary float-end" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse">
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                    </h5>
+                </div>
+                <div class="collapse" id="filterCollapse">
+                    <div class="card-body">
+                        <form method="get">
+                            <div class="row g-3">
+                                <div class="col-md-3">
+                                    <label class="form-label">都道府県</label>
+                                    <select name="prefecture" class="form-select">
+                                        <option value="">すべて</option>
+                                        <option value="東京都" {% if request.GET.prefecture == '東京都' %}selected{% endif %}>東京都</option>
+                                        <option value="大阪府" {% if request.GET.prefecture == '大阪府' %}selected{% endif %}>大阪府</option>
+                                        <!-- 他の都道府県も追加 -->
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">レベル</label>
+                                    <select name="level" class="form-select">
+                                        <option value="">すべて</option>
+                                        <option value="beginner" {% if request.GET.level == 'beginner' %}selected{% endif %}>初心者</option>
+                                        <option value="intermediate" {% if request.GET.level == 'intermediate' %}selected{% endif %}>中級者</option>
+                                        <option value="advanced" {% if request.GET.level == 'advanced' %}selected{% endif %}>上級者</option>
+                                        <option value="open" {% if request.GET.level == 'open' %}selected{% endif %}>オープン</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">開催日（開始）</label>
+                                    <input type="date" name="date_from" class="form-control" value="{{ request.GET.date_from }}">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">開催日（終了）</label>
+                                    <input type="date" name="date_to" class="form-control" value="{{ request.GET.date_to }}">
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-search"></i> 検索
+                                </button>
+                                <a href="{% url 'tournaments:tournament_list' %}" class="btn btn-outline-secondary">
+                                    <i class="bi bi-arrow-clockwise"></i> リセット
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 大会一覧 -->
+    <div class="row">
+        {% for tournament in tournaments %}
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100">
+                    {% if tournament.images.all %}
+                        <img src="{{ tournament.images.first.image.url }}" class="card-img-top" alt="{{ tournament.name }}" style="height: 200px; object-fit: cover;">
+                    {% else %}
+                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                            <i class="bi bi-trophy text-muted" style="font-size: 3rem;"></i>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">{{ tournament.name }}</h5>
+                        
+                        <div class="mb-2">
+                            <small class="text-muted">
+                                <i class="bi bi-calendar"></i> {{ tournament.event_date }}
+                                {% if tournament.event_time %}
+                                    {{ tournament.event_time|time:"H:i" }}
+                                {% endif %}
+                            </small>
+                        </div>
+                        
+                        <div class="mb-2">
+                            <small class="text-muted">
+                                <i class="bi bi-geo-alt"></i> {{ tournament.venue_name }}
+                            </small>
+                        </div>
+                        
+                        <div class="mb-2">
+                            <span class="badge bg-primary">{{ tournament.get_level_display }}</span>
+                            <span class="badge bg-secondary">{{ tournament.prefecture }}</span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <strong class="text-primary">参加費: ¥{{ tournament.fee|floatformat:0 }}</strong>
+                        </div>
+                        
+                        <!-- 申込状況 -->
+                        {% if tournament.is_registration_open %}
+                            <div class="alert alert-success alert-sm mb-2">
+                                <i class="bi bi-check-circle"></i> 
+                                申込受付中 (締切まで{{ tournament.days_until_deadline }}日)
+                            </div>
+                        {% else %}
+                            <div class="alert alert-secondary alert-sm mb-2">
+                                <i class="bi bi-x-circle"></i> 申込締切済み
+                            </div>
+                        {% endif %}
+                        
+                        <div class="mt-auto">
+                            <a href="{% url 'tournaments:tournament_detail' tournament.pk %}" class="btn btn-primary btn-sm me-2">
+                                <i class="bi bi-eye"></i> 詳細を見る
+                            </a>
+                            
+                            {% if user.is_authenticated %}
+                                <button class="btn btn-outline-danger btn-sm favorite-btn" 
+                                        data-tournament-id="{{ tournament.pk }}"
+                                        data-is-favorited="false">
+                                    <i class="bi bi-heart"></i>
+                                </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <div class="text-center py-5">
+                    <i class="bi bi-search text-muted" style="font-size: 4rem;"></i>
+                    <h3 class="mt-3 text-muted">大会が見つかりませんでした</h3>
+                    <p class="text-muted">検索条件を変更してもう一度お試しください。</p>
+                    <a href="{% url 'tournaments:tournament_list' %}" class="btn btn-primary">
+                        すべての大会を見る
+                    </a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- ページネーション -->
+    {% if is_paginated %}
+        <nav aria-label="大会一覧ページネーション">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">最初</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">前へ</a>
+                    </li>
+                {% endif %}
+                
+                <li class="page-item active">
+                    <span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+                </li>
+                
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">次へ</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">最後</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// お気に入り機能のJavaScript
+document.addEventListener('DOMContentLoaded', function() {
+    const favoriteButtons = document.querySelectorAll('.favorite-btn');
+    
+    favoriteButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const tournamentId = this.dataset.tournamentId;
+            
+            fetch(`/tournaments/tournament/${tournamentId}/favorite/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const icon = this.querySelector('i');
+                if (data.is_favorited) {
+                    icon.classList.remove('bi-heart');
+                    icon.classList.add('bi-heart-fill');
+                    this.classList.remove('btn-outline-danger');
+                    this.classList.add('btn-danger');
+                } else {
+                    icon.classList.remove('bi-heart-fill');
+                    icon.classList.add('bi-heart');
+                    this.classList.remove('btn-danger');
+                    this.classList.add('btn-outline-danger');
+                }
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

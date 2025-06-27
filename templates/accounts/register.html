@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}新規登録 - バドミントン大会サーチ{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-7">
+            <div class="card shadow-lg">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <i class="bi bi-person-plus text-primary" style="font-size: 3rem;"></i>
+                        <h2 class="mt-3">新規登録</h2>
+                        <p class="text-muted">アカウントを作成してバドミントン大会を探しましょう</p>
+                    </div>
+                    
+                    <form method="post" id="registrationForm">
+                        {% csrf_token %}
+                        {% crispy form %}
+                    </form>
+                    
+                    <div class="text-center mt-4">
+                        <p class="mb-0">
+                            すでにアカウントをお持ちの方は 
+                            <a href="{% url 'accounts:login' %}" class="text-decoration-none fw-bold">
+                                こちらからログイン
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const userTypeField = document.querySelector('#id_user_type');
+    const organizerFields = document.querySelector('#organizer-fields');
+    
+    function toggleOrganizerFields() {
+        if (userTypeField.value === 'organizer') {
+            organizerFields.style.display = 'block';
+        } else {
+            organizerFields.style.display = 'none';
+        }
+    }
+    
+    if (userTypeField && organizerFields) {
+        toggleOrganizerFields();
+        userTypeField.addEventListener('change', toggleOrganizerFields);
+    }
+});
+</script>
+{% endblock %}

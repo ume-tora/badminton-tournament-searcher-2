@@ -1,0 +1,221 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ tournament.name }} - バドミントン大会サーチ{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- パンくずナビ -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'tournaments:tournament_list' %}">大会一覧</a></li>
+            <li class="breadcrumb-item active">{{ tournament.name }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- メインコンテンツ -->
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                {% if tournament.images.all %}
+                    <img src="{{ tournament.images.first.image.url }}" 
+                         class="card-img-top" 
+                         alt="{{ tournament.name }}" 
+                         style="height: 300px; object-fit: cover;">
+                {% else %}
+                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" 
+                         style="height: 300px;">
+                        <i class="bi bi-trophy text-muted" style="font-size: 4rem;"></i>
+                    </div>
+                {% endif %}
+                
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <h1 class="card-title">{{ tournament.name }}</h1>
+                        {% if user.is_authenticated %}
+                            <button class="btn {% if is_favorited %}btn-danger{% else %}btn-outline-danger{% endif %} favorite-btn" 
+                                    data-tournament-id="{{ tournament.pk }}"
+                                    data-is-favorited="{{ is_favorited|yesno:'true,false' }}">
+                                <i class="bi {% if is_favorited %}bi-heart-fill{% else %}bi-heart{% endif %}"></i>
+                                {% if is_favorited %}お気に入り済み{% else %}お気に入り{% endif %}
+                            </button>
+                        {% endif %}
+                    </div>
+                    
+                    {% if tournament.description %}
+                        <p class="card-text">{{ tournament.description|linebreaks }}</p>
+                    {% endif %}
+                    
+                    <!-- 申込状況 -->
+                    <div class="mb-4">
+                        {% if tournament.is_registration_open %}
+                            <div class="alert alert-success">
+                                <h5><i class="bi bi-check-circle"></i> 申込受付中</h5>
+                                <p class="mb-0">締切まで<strong>{{ tournament.days_until_deadline }}日</strong></p>
+                            </div>
+                        {% else %}
+                            <div class="alert alert-secondary">
+                                <h5><i class="bi bi-x-circle"></i> 申込締切済み</h5>
+                                <p class="mb-0">申込期間は終了しています</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 大会詳細情報 -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3><i class="bi bi-info-circle"></i> 大会詳細</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <strong><i class="bi bi-calendar"></i> 開催日:</strong><br>
+                            {{ tournament.event_date }}
+                            {% if tournament.event_time %}
+                                {{ tournament.event_time|time:"H:i" }}開始
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <strong><i class="bi bi-calendar-x"></i> 申込締切:</strong><br>
+                            {{ tournament.deadline_date }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <strong><i class="bi bi-geo-alt"></i> 会場:</strong><br>
+                            {{ tournament.venue_name }}<br>
+                            <small class="text-muted">{{ tournament.venue_address }}</small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <strong><i class="bi bi-currency-yen"></i> 参加費:</strong><br>
+                            ¥{{ tournament.fee|floatformat:0 }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <strong><i class="bi bi-trophy"></i> レベル:</strong><br>
+                            <span class="badge bg-primary">{{ tournament.get_level_display }}</span>
+                        </div>
+                        {% if tournament.max_participants %}
+                            <div class="col-md-6 mb-3">
+                                <strong><i class="bi bi-people"></i> 定員:</strong><br>
+                                {{ tournament.max_participants }}名
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <strong><i class="bi bi-list-check"></i> 開催種目:</strong><br>
+                        {{ tournament.events|linebreaks }}
+                    </div>
+                    
+                    {% if tournament.event_details_url %}
+                        <div class="mb-3">
+                            <a href="{{ tournament.event_details_url }}" 
+                               class="btn btn-outline-primary" 
+                               target="_blank" 
+                               rel="noopener noreferrer">
+                                <i class="bi bi-link-45deg"></i> 大会要項を見る
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- 連絡先情報 -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3><i class="bi bi-telephone"></i> 連絡先</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <strong>担当者:</strong><br>
+                            {{ tournament.contact_name }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <strong>メールアドレス:</strong><br>
+                            <a href="mailto:{{ tournament.contact_email }}">{{ tournament.contact_email }}</a>
+                        </div>
+                        {% if tournament.contact_phone %}
+                            <div class="col-md-6 mb-3">
+                                <strong>電話番号:</strong><br>
+                                <a href="tel:{{ tournament.contact_phone }}">{{ tournament.contact_phone }}</a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- サイドバー -->
+        <div class="col-lg-4">
+            <!-- 主催者情報 -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="bi bi-person-badge"></i> 主催者</h5>
+                </div>
+                <div class="card-body">
+                    <h6>{{ tournament.organizer.get_display_name }}</h6>
+                    {% if tournament.organizer.organization_website %}
+                        <a href="{{ tournament.organizer.organization_website }}" 
+                           class="btn btn-sm btn-outline-primary" 
+                           target="_blank">
+                            <i class="bi bi-globe"></i> ウェブサイト
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- 関連する大会 -->
+            {% if related_tournaments %}
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="bi bi-trophy"></i> {{ tournament.prefecture }}の他の大会</h5>
+                    </div>
+                    <div class="card-body">
+                        {% for related in related_tournaments %}
+                            <div class="border-bottom pb-2 mb-2">
+                                <h6 class="mb-1">
+                                    <a href="{% url 'tournaments:tournament_detail' related.pk %}" 
+                                       class="text-decoration-none">
+                                        {{ related.name }}
+                                    </a>
+                                </h6>
+                                <small class="text-muted">
+                                    <i class="bi bi-calendar"></i> {{ related.event_date }}
+                                </small>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- 編集・削除ボタン（主催者・管理者のみ） -->
+    {% if tournament.can_edit:user %}
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="d-flex gap-2">
+                    <a href="{% url 'tournaments:tournament_edit' tournament.pk %}" 
+                       class="btn btn-warning">
+                        <i class="bi bi-pencil"></i> 編集
+                    </a>
+                    {% if tournament.can_delete:user %}
+                        <a href="{% url 'tournaments:tournament_delete' tournament.pk %}" 
+                           class="btn btn-danger"
+                           onclick="return confirm('本当に削除しますか？')">
+                            <i class="bi bi-trash"></i> 削除
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// お気に入り機能（main.jsから読み込み）
+</script>
+{% endblock %}
