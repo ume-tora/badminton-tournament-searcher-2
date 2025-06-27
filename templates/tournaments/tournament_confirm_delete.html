@@ -1,0 +1,204 @@
+{% extends 'base.html' %}
+
+{% block title %}大会削除確認 - バドミントン大会サーチ{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- パンくずナビ -->
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'accounts:dashboard' %}">ダッシュボード</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'tournaments:organizer_tournaments' %}">私の大会</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'tournaments:tournament_detail' object.pk %}">{{ object.name }}</a></li>
+                    <li class="breadcrumb-item active">削除確認</li>
+                </ol>
+            </nav>
+
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h3 class="mb-0">
+                        <i class="bi bi-exclamation-triangle"></i> 大会削除の確認
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-danger">
+                        <h5><i class="bi bi-warning"></i> 重要な警告</h5>
+                        <p class="mb-0">
+                            この操作は<strong>取り消すことができません</strong>。
+                            大会を削除すると、関連するお気に入り登録も全て削除されます。
+                        </p>
+                    </div>
+
+                    <!-- 削除対象の大会情報 -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5>削除対象の大会情報</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>大会名:</strong><br>{{ object.name }}</p>
+                                    <p><strong>開催日:</strong><br>{{ object.event_date }}</p>
+                                    <p><strong>会場:</strong><br>{{ object.venue_name }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>申込締切:</strong><br>{{ object.deadline_date }}</p>
+                                    <p><strong>参加費:</strong><br>¥{{ object.fee|floatformat:0 }}</p>
+                                    <p><strong>作成日:</strong><br>{{ object.created_at|date:"Y年m月d日" }}</p>
+                                </div>
+                            </div>
+                            
+                            <!-- 影響を受けるデータ -->
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <h6>削除により影響を受けるデータ:</h6>
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item d-flex justify-content-between">
+                                            <span>お気に入り登録数</span>
+                                            <span class="badge bg-warning">{{ object.favorited_by.count }}件</span>
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between">
+                                            <span>大会画像</span>
+                                            <span class="badge bg-info">{{ object.images.count }}件</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 削除理由（任意） -->
+                    <form method="post" id="deleteForm">
+                        {% csrf_token %}
+                        
+                        <div class="mb-4">
+                            <label for="delete_reason" class="form-label">
+                                <strong>削除理由（任意）</strong>
+                            </label>
+                            <textarea id="delete_reason" name="delete_reason" 
+                                      class="form-control" rows="3" 
+                                      placeholder="削除理由を入力してください（運営者への報告に使用されます）"></textarea>
+                            <div class="form-text">
+                                削除理由は運営者に報告され、サービス改善に役立てられます。
+                            </div>
+                        </div>
+
+                        <!-- 確認チェックボックス -->
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" 
+                                       id="confirmDelete" required>
+                                <label class="form-check-label" for="confirmDelete">
+                                    <strong>上記の内容を理解し、「{{ object.name }}」を削除することに同意します</strong>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- アクションボタン -->
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'tournaments:tournament_detail' object.pk %}" 
+                               class="btn btn-secondary btn-lg">
+                                <i class="bi bi-arrow-left"></i> キャンセル
+                            </a>
+                            <button type="submit" class="btn btn-danger btn-lg" id="deleteButton" disabled>
+                                <i class="bi bi-trash"></i> 削除を実行
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 代替案の提案 -->
+            <div class="card mt-4 border-info">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-lightbulb"></i> 削除以外の選択肢
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p>大会を削除する前に、以下の選択肢もご検討ください：</p>
+                    <ul>
+                        <li><strong>大会情報の編集</strong> - 間違いがある場合は編集で修正できます</li>
+                        <li><strong>一時的な非表示</strong> - 運営者にお問い合わせいただければ、一時的に非表示にできます</li>
+                        <li><strong>開催中止の連絡</strong> - 中止の場合は、大会名に「【中止】」を追加して参加者に伝えることができます</li>
+                    </ul>
+                    <div class="mt-3">
+                        <a href="{% url 'tournaments:tournament_edit' object.pk %}" 
+                           class="btn btn-outline-primary me-2">
+                            <i class="bi bi-pencil"></i> 大会を編集
+                        </a>
+                        <a href="mailto:support@badminton-search.com?subject=大会に関するお問い合わせ&body=大会名: {{ object.name }}%0A問い合わせ内容: " 
+                           class="btn btn-outline-info">
+                            <i class="bi bi-envelope"></i> 運営者に相談
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const confirmCheck = document.getElementById('confirmDelete');
+    const deleteButton = document.getElementById('deleteButton');
+    const deleteForm = document.getElementById('deleteForm');
+    
+    // チェックボックスの状態に応じてボタンを有効/無効化
+    confirmCheck.addEventListener('change', function() {
+        deleteButton.disabled = !this.checked;
+        
+        if (this.checked) {
+            deleteButton.classList.remove('btn-outline-danger');
+            deleteButton.classList.add('btn-danger');
+        } else {
+            deleteButton.classList.remove('btn-danger');
+            deleteButton.classList.add('btn-outline-danger');
+        }
+    });
+    
+    // フォーム送信時の最終確認
+    deleteForm.addEventListener('submit', function(e) {
+        if (!confirmCheck.checked) {
+            e.preventDefault();
+            alert('削除を実行するには、確認チェックボックスにチェックを入れてください。');
+            return false;
+        }
+        
+        const tournamentName = '{{ object.name|escapejs }}';
+        const finalConfirm = confirm(
+            `本当に「${tournamentName}」を削除しますか？\n\n` +
+            'この操作は取り消すことができません。'
+        );
+        
+        if (!finalConfirm) {
+            e.preventDefault();
+            return false;
+        }
+        
+        // 削除ボタンを無効化してダブル送信を防ぐ
+        deleteButton.disabled = true;
+        deleteButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> 削除中...';
+    });
+    
+    // ページ離脱時の警告
+    let formChanged = false;
+    const reasonTextarea = document.getElementById('delete_reason');
+    
+    reasonTextarea.addEventListener('input', function() {
+        formChanged = true;
+    });
+    
+    window.addEventListener('beforeunload', function(e) {
+        if (formChanged && !confirmCheck.checked) {
+            e.preventDefault();
+            e.returnValue = '';
+        }
+    });
+});
+</script>
+{% endblock %}

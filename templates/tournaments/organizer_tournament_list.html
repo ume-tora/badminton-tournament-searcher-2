@@ -1,0 +1,275 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - バドミントン大会サーチ{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <!-- ヘッダー -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>
+                    <i class="bi bi-trophy"></i> {{ title }}
+                </h1>
+                {% if user.is_verified_organizer %}
+                    <a href="{% url 'tournaments:tournament_create' %}" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> 新しい大会を作成
+                    </a>
+                {% endif %}
+            </div>
+
+            <!-- 認証状況 -->
+            {% if not user.is_verified_organizer %}
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <strong>主催者認証待ち</strong> - 大会を作成するには運営者による認証が必要です。
+                    認証が完了するまでしばらくお待ちください。
+                </div>
+            {% endif %}
+
+            <!-- 統計情報 -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <i class="bi bi-trophy text-primary" style="font-size: 2rem;"></i>
+                            <h3 class="mt-2">{{ tournaments|length }}</h3>
+                            <p class="text-muted mb-0">作成した大会</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <i class="bi bi-calendar-event text-success" style="font-size: 2rem;"></i>
+                            <h3 class="mt-2">
+                                {% widthratio tournaments|length 1 1 as upcoming %}
+                                {{ upcoming|default:0 }}
+                            </h3>
+                            <p class="text-muted mb-0">開催予定</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <i class="bi bi-check-circle text-info" style="font-size: 2rem;"></i>
+                            <h3 class="mt-2">
+                                {% widthratio tournaments|length 1 1 as active %}
+                                {{ active|default:0 }}
+                            </h3>
+                            <p class="text-muted mb-0">アクティブ</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <i class="bi bi-heart text-danger" style="font-size: 2rem;"></i>
+                            <h3 class="mt-2">0</h3>
+                            <p class="text-muted mb-0">お気に入り数</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 大会一覧 -->
+            {% if tournaments %}
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-list"></i> 大会一覧
+                        </h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>大会名</th>
+                                        <th>開催日</th>
+                                        <th>会場</th>
+                                        <th>申込状況</th>
+                                        <th>ステータス</th>
+                                        <th>作成日</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for tournament in tournaments %}
+                                        <tr>
+                                            <td>
+                                                <strong>{{ tournament.name }}</strong>
+                                                {% if not tournament.is_approved %}
+                                                    <br><small class="badge bg-warning">承認待ち</small>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {{ tournament.event_date }}
+                                                {% if tournament.event_time %}
+                                                    <br><small class="text-muted">{{ tournament.event_time|time:"H:i" }}</small>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {{ tournament.venue_name }}
+                                                <br><small class="text-muted">{{ tournament.prefecture }}</small>
+                                            </td>
+                                            <td>
+                                                {% if tournament.is_registration_open %}
+                                                    <span class="badge bg-success">
+                                                        <i class="bi bi-check-circle"></i> 受付中
+                                                    </span>
+                                                    <br><small class="text-muted">
+                                                        締切まで{{ tournament.days_until_deadline }}日
+                                                    </small>
+                                                {% else %}
+                                                    <span class="badge bg-secondary">
+                                                        <i class="bi bi-x-circle"></i> 締切済み
+                                                    </span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if tournament.is_upcoming %}
+                                                    <span class="badge bg-primary">
+                                                        <i class="bi bi-calendar-event"></i> 開催予定
+                                                    </span>
+                                                    <br><small class="text-muted">
+                                                        {{ tournament.days_until_event }}日後
+                                                    </small>
+                                                {% else %}
+                                                    <span class="badge bg-secondary">
+                                                        <i class="bi bi-calendar-check"></i> 開催済み
+                                                    </span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {{ tournament.created_at|date:"m/d" }}
+                                                <br><small class="text-muted">{{ tournament.created_at|date:"Y" }}</small>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a href="{% url 'tournaments:tournament_detail' tournament.pk %}" 
+                                                       class="btn btn-outline-primary btn-sm" 
+                                                       title="詳細表示">
+                                                        <i class="bi bi-eye"></i>
+                                                    </a>
+                                                    <a href="{% url 'tournaments:tournament_edit' tournament.pk %}" 
+                                                       class="btn btn-outline-warning btn-sm" 
+                                                       title="編集">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+                                                    <a href="{% url 'tournaments:tournament_delete' tournament.pk %}" 
+                                                       class="btn btn-outline-danger btn-sm" 
+                                                       title="削除"
+                                                       onclick="return confirm('「{{ tournament.name }}」を削除しますか？この操作は取り消せません。')">
+                                                        <i class="bi bi-trash"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ページネーション -->
+                {% if is_paginated %}
+                    <nav aria-label="大会一覧ページネーション" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1">最初</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">前へ</a>
+                                </li>
+                            {% endif %}
+                            
+                            <li class="page-item active">
+                                <span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+                            </li>
+                            
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">次へ</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">最後</a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+
+            {% else %}
+                <!-- 大会がない場合 -->
+                <div class="text-center py-5">
+                    <i class="bi bi-trophy text-muted" style="font-size: 4rem;"></i>
+                    <h3 class="mt-3 text-muted">まだ大会を作成していません</h3>
+                    <p class="text-muted">
+                        {% if user.is_verified_organizer %}
+                            最初の大会を作成してみましょう！
+                        {% else %}
+                            主催者認証が完了すると大会を作成できるようになります。
+                        {% endif %}
+                    </p>
+                    {% if user.is_verified_organizer %}
+                        <a href="{% url 'tournaments:tournament_create' %}" class="btn btn-primary btn-lg">
+                            <i class="bi bi-plus-circle"></i> 新しい大会を作成
+                        </a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- ヘルプセクション -->
+    {% if user.is_verified_organizer %}
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="card border-info">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-question-circle"></i> 主催者ヘルプ
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <h6><i class="bi bi-plus-circle text-primary"></i> 大会作成のコツ</h6>
+                                <ul class="small">
+                                    <li>明確で魅力的な大会名を付ける</li>
+                                    <li>申込締切は余裕をもって設定</li>
+                                    <li>連絡先は参加者が連絡しやすいものを</li>
+                                    <li>大会要項URLがあると参加者に親切</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-4">
+                                <h6><i class="bi bi-gear text-warning"></i> 大会管理</h6>
+                                <ul class="small">
+                                    <li>大会情報は随時更新可能</li>
+                                    <li>申込締切後も情報修正は可能</li>
+                                    <li>大会終了後は参加者への御礼も忘れずに</li>
+                                    <li>問題があれば運営者にご連絡を</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-4">
+                                <h6><i class="bi bi-shield-check text-success"></i> 注意事項</h6>
+                                <ul class="small">
+                                    <li>虚偽の情報は登録しないでください</li>
+                                    <li>参加費は事前に明確に提示</li>
+                                    <li>トラブル時は速やかにご連絡を</li>
+                                    <li>法令・規約を遵守してください</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

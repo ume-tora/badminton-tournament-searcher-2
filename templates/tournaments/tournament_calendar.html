@@ -1,0 +1,417 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - バドミントン大会サーチ{% endblock %}
+
+{% block extra_head %}
+<!-- FullCalendar CSS -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">
+                <i class="bi bi-calendar3"></i> {{ title }}
+            </h1>
+        </div>
+    </div>
+
+    <!-- カレンダーコントロール -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-outline-primary" id="prevBtn">
+                    <i class="bi bi-chevron-left"></i> 前の月
+                </button>
+                <button type="button" class="btn btn-outline-primary" id="todayBtn">
+                    <i class="bi bi-calendar-check"></i> 今月
+                </button>
+                <button type="button" class="btn btn-outline-primary" id="nextBtn">
+                    次の月 <i class="bi bi-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+        <div class="col-md-4 text-end">
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-outline-secondary" id="monthView">月表示</button>
+                <button type="button" class="btn btn-outline-secondary" id="listView">リスト表示</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 凡例 -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h6><i class="bi bi-info-circle"></i> 凡例</h6>
+                    <div class="d-flex flex-wrap gap-3">
+                        <span class="badge bg-primary">開催予定</span>
+                        <span class="badge bg-success">申込受付中</span>
+                        <span class="badge bg-warning">締切間近</span>
+                        <span class="badge bg-secondary">締切済み</span>
+                        <span class="badge bg-info">本日開催</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- カレンダー表示 -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div id="calendar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- モバイル用リスト表示 -->
+    <div class="row mt-4 d-md-none" id="mobileList">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-list"></i> 大会一覧</h5>
+                </div>
+                <div class="card-body" id="mobileListContent">
+                    <!-- JavaScript で動的に生成 -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 大会詳細モーダル -->
+<div class="modal fade" id="tournamentModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">大会詳細</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- JavaScript で動的に生成 -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
+                <a href="#" class="btn btn-primary" id="modalDetailLink">詳細ページへ</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- FullCalendar JS -->
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/locales/ja.global.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const calendarEl = document.getElementById('calendar');
+    
+    // カレンダーデータ（サーバーから取得）
+    const calendarData = {{ calendar_data|safe }};
+    
+    // イベントデータの準備
+    const events = [];
+    for (const [date, tournaments] of Object.entries(calendarData)) {
+        tournaments.forEach(tournament => {
+            const today = new Date().toISOString().split('T')[0];
+            let className = 'tournament-event';
+            let backgroundColor = '#0d6efd'; // primary
+            
+            // ステータスに応じて色分け
+            if (tournament.event_date === today) {
+                backgroundColor = '#17a2b8'; // info
+                className += ' today-event';
+            } else if (tournament.is_registration_open) {
+                if (tournament.days_until_deadline <= 3) {
+                    backgroundColor = '#ffc107'; // warning
+                    className += ' deadline-soon';
+                } else {
+                    backgroundColor = '#28a745'; // success
+                    className += ' registration-open';
+                }
+            } else {
+                backgroundColor = '#6c757d'; // secondary
+                className += ' registration-closed';
+            }
+            
+            events.push({
+                id: tournament.id,
+                title: tournament.name,
+                start: tournament.event_date,
+                backgroundColor: backgroundColor,
+                borderColor: backgroundColor,
+                className: className,
+                extendedProps: {
+                    tournament: tournament
+                }
+            });
+        });
+    }
+    
+    // FullCalendar の初期化
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+        locale: 'ja',
+        initialView: 'dayGridMonth',
+        headerToolbar: {
+            left: '',
+            center: 'title',
+            right: ''
+        },
+        height: 600,
+        events: events,
+        eventClick: function(info) {
+            showTournamentModal(info.event.extendedProps.tournament);
+        },
+        eventDidMount: function(info) {
+            // ツールチップ追加
+            info.el.setAttribute('title', 
+                `${info.event.title}\n会場: ${info.event.extendedProps.tournament.venue_name}`
+            );
+        },
+        dayCellDidMount: function(info) {
+            // 今日の日付をハイライト
+            const today = new Date().toISOString().split('T')[0];
+            if (info.dateStr === today) {
+                info.el.classList.add('today-cell');
+            }
+        }
+    });
+    
+    calendar.render();
+    
+    // カレンダーコントロール
+    document.getElementById('prevBtn').addEventListener('click', function() {
+        calendar.prev();
+    });
+    
+    document.getElementById('nextBtn').addEventListener('click', function() {
+        calendar.next();
+    });
+    
+    document.getElementById('todayBtn').addEventListener('click', function() {
+        calendar.today();
+    });
+    
+    document.getElementById('monthView').addEventListener('click', function() {
+        calendar.changeView('dayGridMonth');
+        this.classList.add('active');
+        document.getElementById('listView').classList.remove('active');
+    });
+    
+    document.getElementById('listView').addEventListener('click', function() {
+        calendar.changeView('listWeek');
+        this.classList.add('active');
+        document.getElementById('monthView').classList.remove('active');
+    });
+    
+    // モバイル用リスト表示
+    function updateMobileList() {
+        const mobileListContent = document.getElementById('mobileListContent');
+        let html = '';
+        
+        const sortedEvents = events.sort((a, b) => new Date(a.start) - new Date(b.start));
+        
+        sortedEvents.forEach(event => {
+            const tournament = event.extendedProps.tournament;
+            const date = new Date(tournament.event_date);
+            const formattedDate = date.toLocaleDateString('ja-JP', {
+                month: 'long',
+                day: 'numeric',
+                weekday: 'short'
+            });
+            
+            html += `
+                <div class="border-bottom pb-2 mb-2">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="mb-1">${tournament.name}</h6>
+                            <small class="text-muted">
+                                <i class="bi bi-calendar"></i> ${formattedDate}
+                                <i class="bi bi-geo-alt ms-2"></i> ${tournament.venue_name}
+                            </small>
+                        </div>
+                        <span class="badge" style="background-color: ${event.backgroundColor}">
+                            ${getStatusText(tournament)}
+                        </span>
+                    </div>
+                    <div class="mt-2">
+                        <button class="btn btn-sm btn-outline-primary" 
+                                onclick="showTournamentModal(${JSON.stringify(tournament).replace(/"/g, '&quot;')})">
+                            詳細
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+        
+        if (html === '') {
+            html = '<p class="text-muted">表示する大会がありません。</p>';
+        }
+        
+        mobileListContent.innerHTML = html;
+    }
+    
+    // ステータステキストを取得
+    function getStatusText(tournament) {
+        const today = new Date().toISOString().split('T')[0];
+        if (tournament.event_date === today) {
+            return '本日開催';
+        } else if (tournament.is_registration_open) {
+            if (tournament.days_until_deadline <= 3) {
+                return '締切間近';
+            } else {
+                return '受付中';
+            }
+        } else {
+            return '締切済み';
+        }
+    }
+    
+    // 大会詳細モーダル表示
+    function showTournamentModal(tournament) {
+        const modal = new bootstrap.Modal(document.getElementById('tournamentModal'));
+        const modalTitle = document.getElementById('modalTitle');
+        const modalBody = document.getElementById('modalBody');
+        const modalDetailLink = document.getElementById('modalDetailLink');
+        
+        modalTitle.textContent = tournament.name;
+        modalDetailLink.href = `/tournaments/tournament/${tournament.id}/`;
+        
+        const eventDate = new Date(tournament.event_date);
+        const formattedDate = eventDate.toLocaleDateString('ja-JP', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            weekday: 'long'
+        });
+        
+        modalBody.innerHTML = `
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong><i class="bi bi-calendar"></i> 開催日:</strong><br>${formattedDate}</p>
+                    <p><strong><i class="bi bi-geo-alt"></i> 会場:</strong><br>${tournament.venue_name}</p>
+                    <p><strong><i class="bi bi-map"></i> 住所:</strong><br>${tournament.venue_address || '未設定'}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong><i class="bi bi-calendar-x"></i> 申込締切:</strong><br>${tournament.deadline_date}</p>
+                    <p><strong><i class="bi bi-currency-yen"></i> 参加費:</strong><br>¥${tournament.fee}</p>
+                    <p><strong><i class="bi bi-trophy"></i> レベル:</strong><br>${tournament.level_display}</p>
+                </div>
+            </div>
+            ${tournament.description ? `<div class="mt-3"><strong>概要:</strong><br>${tournament.description}</div>` : ''}
+            <div class="mt-3">
+                <span class="badge bg-primary">${tournament.level_display}</span>
+                <span class="badge bg-secondary">${tournament.prefecture}</span>
+                ${getStatusBadge(tournament)}
+            </div>
+        `;
+        
+        modal.show();
+    }
+    
+    // ステータスバッジを取得
+    function getStatusBadge(tournament) {
+        const today = new Date().toISOString().split('T')[0];
+        if (tournament.event_date === today) {
+            return '<span class="badge bg-info">本日開催</span>';
+        } else if (tournament.is_registration_open) {
+            if (tournament.days_until_deadline <= 3) {
+                return '<span class="badge bg-warning">締切間近</span>';
+            } else {
+                return '<span class="badge bg-success">受付中</span>';
+            }
+        } else {
+            return '<span class="badge bg-secondary">締切済み</span>';
+        }
+    }
+    
+    // グローバル関数として定義（HTML内のonclickで使用）
+    window.showTournamentModal = showTournamentModal;
+    
+    // 初期表示
+    updateMobileList();
+    
+    // レスポンシブ対応
+    function handleResize() {
+        if (window.innerWidth < 768) {
+            document.getElementById('mobileList').style.display = 'block';
+        } else {
+            document.getElementById('mobileList').style.display = 'none';
+        }
+    }
+    
+    window.addEventListener('resize', handleResize);
+    handleResize();
+});
+</script>
+
+<style>
+.today-cell {
+    background-color: #fff3cd !important;
+}
+
+.tournament-event {
+    border-radius: 3px;
+    font-size: 0.8em;
+    padding: 1px 3px;
+}
+
+.fc-event-title {
+    font-weight: 500;
+}
+
+.fc-daygrid-event {
+    margin: 1px 0;
+}
+
+/* モバイル対応 */
+@media (max-width: 767px) {
+    .fc-toolbar {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .fc-toolbar-chunk {
+        display: flex;
+        justify-content: center;
+    }
+    
+    .fc-daygrid-event {
+        font-size: 0.7em;
+    }
+}
+
+/* カレンダーのカスタムスタイル */
+.fc-theme-standard td, .fc-theme-standard th {
+    border-color: #dee2e6;
+}
+
+.fc-daygrid-day-frame {
+    min-height: 60px;
+}
+
+.fc-event-main {
+    color: white;
+}
+
+.fc-day-today .fc-daygrid-day-number {
+    background-color: #0d6efd;
+    color: white;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 2px;
+}
+</style>
+{% endblock %}

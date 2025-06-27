@@ -1,0 +1,107 @@
+[
+  {
+    "model": "accounts.user",
+    "pk": 1,
+    "fields": {
+      "username": "tokyo_organizer",
+      "email": "organizer@tokyo-badminton.jp",
+      "password": "pbkdf2_sha256$600000$dummy$dummy",
+      "first_name": "太郎",
+      "last_name": "田中",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "user_type": "organizer",
+      "is_verified_organizer": true,
+      "phone_number": "03-1234-5678",
+      "prefecture": "東京都",
+      "organization_name": "東京バドミントン協会",
+      "organization_website": "https://tokyo-badminton.jp",
+      "date_joined": "2024-01-15T09:00:00Z"
+    }
+  },
+  {
+    "model": "accounts.user",
+    "pk": 2,
+    "fields": {
+      "username": "osaka_organizer",
+      "email": "info@osaka-badminton.or.jp",
+      "password": "pbkdf2_sha256$600000$dummy$dummy",
+      "first_name": "花子",
+      "last_name": "佐藤",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "user_type": "organizer",
+      "is_verified_organizer": true,
+      "phone_number": "06-1111-2222",
+      "prefecture": "大阪府",
+      "organization_name": "大阪府バドミントン協会",
+      "organization_website": "https://osaka-badminton.or.jp",
+      "date_joined": "2024-01-20T10:30:00Z"
+    }
+  },
+  {
+    "model": "accounts.user",
+    "pk": 3,
+    "fields": {
+      "username": "player_yamada",
+      "email": "yamada@example.com",
+      "password": "pbkdf2_sha256$600000$dummy$dummy",
+      "first_name": "次郎",
+      "last_name": "山田",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "user_type": "general",
+      "is_verified_organizer": false,
+      "phone_number": "090-1234-5678",
+      "prefecture": "東京都",
+      "organization_name": "",
+      "organization_website": "",
+      "date_joined": "2024-02-01T14:20:00Z"
+    }
+  },
+  {
+    "model": "accounts.user",
+    "pk": 4,
+    "fields": {
+      "username": "player_tanaka",
+      "email": "tanaka@example.com",
+      "password": "pbkdf2_sha256$600000$dummy$dummy",
+      "first_name": "美咲",
+      "last_name": "田中",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "user_type": "general",
+      "is_verified_organizer": false,
+      "phone_number": "080-9876-5432",
+      "prefecture": "神奈川県",
+      "organization_name": "",
+      "organization_website": "",
+      "date_joined": "2024-02-10T16:45:00Z"
+    }
+  },
+  {
+    "model": "accounts.user",
+    "pk": 5,
+    "fields": {
+      "username": "admin",
+      "email": "admin@badminton-search.com",
+      "password": "pbkdf2_sha256$600000$dummy$dummy",
+      "first_name": "管理",
+      "last_name": "者",
+      "is_active": true,
+      "is_staff": true,
+      "is_superuser": true,
+      "user_type": "admin",
+      "is_verified_organizer": false,
+      "phone_number": "03-0000-0000",
+      "prefecture": "東京都",
+      "organization_name": "バドミントン大会サーチ運営事務局",
+      "organization_website": "https://badminton-search.com",
+      "date_joined": "2024-01-01T00:00:00Z"
+    }
+  }
+]

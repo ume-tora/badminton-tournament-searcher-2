@@ -1,0 +1,276 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - バドミントン大会サーチ{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">
+                <i class="bi bi-heart-fill text-danger"></i> {{ title }}
+            </h1>
+        </div>
+    </div>
+
+    {% if favorites %}
+        <!-- 統計情報 -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="bi bi-heart-fill text-danger" style="font-size: 2rem;"></i>
+                        <h3 class="mt-2">{{ favorites|length }}</h3>
+                        <p class="text-muted mb-0">お気に入り大会</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="bi bi-calendar-event text-success" style="font-size: 2rem;"></i>
+                        <h3 class="mt-2">
+                            {% for favorite in favorites %}
+                                {% if favorite.tournament.is_upcoming %}1{% endif %}
+                            {% endfor %}
+                        </h3>
+                        <p class="text-muted mb-0">開催予定</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="bi bi-clock text-warning" style="font-size: 2rem;"></i>
+                        <h3 class="mt-2">
+                            {% for favorite in favorites %}
+                                {% if favorite.tournament.is_registration_open %}1{% endif %}
+                            {% endfor %}
+                        </h3>
+                        <p class="text-muted mb-0">申込受付中</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- お気に入り大会一覧 -->
+        <div class="row">
+            {% for favorite in favorites %}
+                <div class="col-lg-6 mb-4">
+                    <div class="card h-100">
+                        {% if favorite.tournament.images.all %}
+                            <img src="{{ favorite.tournament.images.first.image.url }}" 
+                                 class="card-img-top" 
+                                 alt="{{ favorite.tournament.name }}" 
+                                 style="height: 200px; object-fit: cover;">
+                        {% else %}
+                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" 
+                                 style="height: 200px;">
+                                <i class="bi bi-trophy text-muted" style="font-size: 3rem;"></i>
+                            </div>
+                        {% endif %}
+                        
+                        <!-- ステータスバッジ -->
+                        <div class="position-absolute top-0 end-0 m-2">
+                            {% if favorite.tournament.is_registration_open %}
+                                <span class="badge bg-success">受付中</span>
+                            {% else %}
+                                <span class="badge bg-secondary">締切済み</span>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">{{ favorite.tournament.name }}</h5>
+                            
+                            <!-- 基本情報 -->
+                            <div class="mb-3">
+                                <div class="mb-2">
+                                    <small class="text-muted">
+                                        <i class="bi bi-calendar"></i> {{ favorite.tournament.event_date }}
+                                        {% if favorite.tournament.event_time %}
+                                            {{ favorite.tournament.event_time|time:"H:i" }}
+                                        {% endif %}
+                                    </small>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-muted">
+                                        <i class="bi bi-geo-alt"></i> {{ favorite.tournament.venue_name }}
+                                    </small>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-muted">
+                                        <i class="bi bi-calendar-x"></i> 申込締切: {{ favorite.tournament.deadline_date }}
+                                    </small>
+                                </div>
+                            </div>
+                            
+                            <!-- バッジ情報 -->
+                            <div class="mb-3">
+                                <span class="badge bg-primary">{{ favorite.tournament.get_level_display }}</span>
+                                <span class="badge bg-secondary">{{ favorite.tournament.prefecture }}</span>
+                                {% if favorite.tournament.is_upcoming %}
+                                    <span class="badge bg-info">
+                                        {{ favorite.tournament.days_until_event }}日後開催
+                                    </span>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- 参加費 -->
+                            <div class="mb-3">
+                                <strong class="text-primary">
+                                    <i class="bi bi-currency-yen"></i> ¥{{ favorite.tournament.fee|floatformat:0 }}
+                                </strong>
+                            </div>
+                            
+                            <!-- 申込状況アラート -->
+                            {% if favorite.tournament.is_registration_open %}
+                                {% if favorite.tournament.days_until_deadline <= 3 %}
+                                    <div class="alert alert-warning alert-sm mb-3">
+                                        <i class="bi bi-exclamation-triangle"></i> 
+                                        申込締切まで<strong>{{ favorite.tournament.days_until_deadline }}日</strong>
+                                    </div>
+                                {% elif favorite.tournament.days_until_deadline <= 7 %}
+                                    <div class="alert alert-info alert-sm mb-3">
+                                        <i class="bi bi-info-circle"></i> 
+                                        申込締切まで{{ favorite.tournament.days_until_deadline }}日
+                                    </div>
+                                {% endif %}
+                            {% endif %}
+                            
+                            <!-- お気に入り登録日 -->
+                            <div class="mb-3">
+                                <small class="text-muted">
+                                    <i class="bi bi-heart"></i> {{ favorite.created_at|date:"Y年m月d日" }}にお気に入り登録
+                                </small>
+                            </div>
+                            
+                            <!-- アクションボタン -->
+                            <div class="mt-auto">
+                                <div class="d-flex justify-content-between">
+                                    <a href="{% url 'tournaments:tournament_detail' favorite.tournament.pk %}" 
+                                       class="btn btn-primary">
+                                        <i class="bi bi-eye"></i> 詳細を見る
+                                    </a>
+                                    <button class="btn btn-danger favorite-btn" 
+                                            data-tournament-id="{{ favorite.tournament.pk }}"
+                                            data-is-favorited="true">
+                                        <i class="bi bi-heart-fill"></i> 削除
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- ページネーション -->
+        {% if is_paginated %}
+            <nav aria-label="お気に入り一覧ページネーション" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1">最初</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">前へ</a>
+                        </li>
+                    {% endif %}
+                    
+                    <li class="page-item active">
+                        <span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+                    </li>
+                    
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}">次へ</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">最後</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+
+    {% else %}
+        <!-- お気に入りがない場合 -->
+        <div class="text-center py-5">
+            <i class="bi bi-heart text-muted" style="font-size: 4rem;"></i>
+            <h3 class="mt-3 text-muted">お気に入り大会がまだありません</h3>
+            <p class="text-muted">気になる大会を見つけたら、ハートボタンでお気に入りに追加してみましょう！</p>
+            <div class="mt-4">
+                <a href="{% url 'tournaments:tournament_list' %}" class="btn btn-primary btn-lg me-3">
+                    <i class="bi bi-search"></i> 大会を探す
+                </a>
+                <a href="{% url 'tournaments:tournament_search' %}" class="btn btn-outline-primary btn-lg">
+                    <i class="bi bi-funnel"></i> 詳細検索
+                </a>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- ヒント -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card border-info">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-lightbulb"></i> お気に入り機能のヒント
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <h6><i class="bi bi-heart text-danger"></i> お気に入り登録</h6>
+                            <p class="small">
+                                大会詳細ページや一覧ページのハートボタンをクリックすると、
+                                簡単にお気に入り登録・解除ができます。
+                            </p>
+                        </div>
+                        <div class="col-md-4">
+                            <h6><i class="bi bi-bell text-warning"></i> リマインダー</h6>
+                            <p class="small">
+                                お気に入り登録した大会の申込締切が近づくと、
+                                このページで確認できます。（今後、メール通知機能を追加予定）
+                            </p>
+                        </div>
+                        <div class="col-md-4">
+                            <h6><i class="bi bi-filter text-primary"></i> 効率的な大会探し</h6>
+                            <p class="small">
+                                詳細検索機能を使って、あなたの条件に合う大会を効率的に見つけて、
+                                どんどんお気に入りに追加しましょう。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// お気に入り機能（main.jsから読み込み）
+document.addEventListener('DOMContentLoaded', function() {
+    const favoriteButtons = document.querySelectorAll('.favorite-btn');
+    
+    favoriteButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // 確認ダイアログ
+            if (!confirm('このお気に入りを削除しますか？')) {
+                return;
+            }
+            
+            // main.jsのtoggleFavorite関数を呼び出し
+            if (typeof toggleFavorite === 'function') {
+                toggleFavorite(this);
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

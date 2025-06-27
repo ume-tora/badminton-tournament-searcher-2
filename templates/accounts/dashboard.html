@@ -1,0 +1,215 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}ダッシュボード - バドミントン大会サーチ{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>
+                    <i class="bi bi-speedometer2"></i> ダッシュボード
+                </h1>
+                <span class="badge bg-primary fs-6">{{ user.get_user_type_display }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ユーザー情報 -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-person-circle"></i> ユーザー情報</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>ユーザー名:</strong> {{ user.username }}</p>
+                            <p><strong>メール:</strong> {{ user.email }}</p>
+                            {% if user.prefecture %}
+                                <p><strong>都道府県:</strong> {{ user.prefecture }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            {% if user.is_organizer %}
+                                <p><strong>団体名:</strong> {{ user.organization_name|default:"未設定" }}</p>
+                                <p><strong>認証状況:</strong> 
+                                    {% if user.is_verified_organizer %}
+                                        <span class="badge bg-success">認証済み</span>
+                                    {% else %}
+                                        <span class="badge bg-warning">認証待ち</span>
+                                    {% endif %}
+                                </p>
+                            {% endif %}
+                            <p><strong>登録日:</strong> {{ user.date_joined|date:"Y年m月d日" }}</p>
+                        </div>
+                    </div>
+                    <a href="{% url 'accounts:profile' %}" class="btn btn-outline-primary">
+                        <i class="bi bi-pencil"></i> プロフィール編集
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="bi bi-person-circle text-primary" style="font-size: 4rem;"></i>
+                    <h5 class="mt-3">{{ user.get_display_name }}</h5>
+                    <p class="text-muted">{{ user.get_user_type_display }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主催者向け情報 -->
+    {% if user.is_organizer %}
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="bi bi-trophy"></i> 主催者メニュー</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if user.is_verified_organizer %}
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="text-center">
+                                        <i class="bi bi-trophy text-primary" style="font-size: 2rem;"></i>
+                                        <h4 class="mt-2">{{ tournaments_created }}</h4>
+                                        <p class="text-muted">作成した大会</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-9">
+                                    <div class="d-grid gap-2 d-md-flex">
+                                        <a href="{% url 'tournaments:tournament_create' %}" class="btn btn-primary">
+                                            <i class="bi bi-plus-circle"></i> 新しい大会を作成
+                                        </a>
+                                        <a href="{% url 'tournaments:organizer_tournaments' %}" class="btn btn-outline-primary">
+                                            <i class="bi bi-list"></i> 私の大会一覧
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="alert alert-warning">
+                                <h6><i class="bi bi-exclamation-triangle"></i> 認証待ちです</h6>
+                                <p class="mb-0">大会を作成するには、運営者による認証が必要です。認証が完了するまでしばらくお待ちください。</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- 一般ユーザー向け情報 -->
+    {% if not user.is_organizer %}
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="bi bi-heart"></i> お気に入り大会</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <i class="bi bi-heart-fill text-danger" style="font-size: 2rem;"></i>
+                                    <h4 class="mt-2">{{ favorite_tournaments }}</h4>
+                                    <p class="text-muted">お気に入り</p>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <div class="d-grid gap-2 d-md-flex">
+                                    <a href="{% url 'tournaments:tournament_list' %}" class="btn btn-primary">
+                                        <i class="bi bi-search"></i> 大会を探す
+                                    </a>
+                                    <a href="{% url 'tournaments:favorite_list' %}" class="btn btn-outline-primary">
+                                        <i class="bi bi-heart"></i> お気に入り一覧
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- クイックアクション -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-lightning"></i> クイックアクション</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <a href="{% url 'tournaments:tournament_list' %}" class="btn btn-outline-primary w-100">
+                                <i class="bi bi-list"></i><br>
+                                <small>大会一覧</small>
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            <a href="{% url 'tournaments:tournament_search' %}" class="btn btn-outline-primary w-100">
+                                <i class="bi bi-search"></i><br>
+                                <small>詳細検索</small>
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            <a href="{% url 'tournaments:tournament_calendar' %}" class="btn btn-outline-primary w-100">
+                                <i class="bi bi-calendar"></i><br>
+                                <small>カレンダー</small>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 管理者向け情報 -->
+    {% if user.is_staff %}
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-warning">
+                    <div class="card-header bg-warning">
+                        <h5 class="mb-0"><i class="bi bi-shield-check"></i> 管理者メニュー</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2 d-md-flex">
+                            <a href="/admin/" class="btn btn-warning" target="_blank">
+                                <i class="bi bi-gear"></i> Django Admin
+                            </a>
+                            <a href="{% url 'tournaments:tournament_list' %}?admin=true" class="btn btn-outline-warning">
+                                <i class="bi bi-eye"></i> サイト監視
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- 最近の活動 -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-clock-history"></i> 最近の活動</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">
+                        <i class="bi bi-info-circle"></i> 
+                        最近の活動履歴は今後のアップデートで実装予定です。
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

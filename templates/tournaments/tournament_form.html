@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ title }} - バドミントン大会サーチ{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <!-- パンくずナビ -->
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'accounts:dashboard' %}">ダッシュボード</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'tournaments:organizer_tournaments' %}">私の大会</a></li>
+                    <li class="breadcrumb-item active">{{ title }}</li>
+                </ol>
+            </nav>
+
+            <div class="card shadow-lg">
+                <div class="card-header">
+                    <h2 class="mb-0">
+                        <i class="bi bi-trophy"></i> {{ title }}
+                    </h2>
+                    {% if user.is_verified_organizer %}
+                        <small class="text-success">
+                            <i class="bi bi-check-circle"></i> 認証済み主催者
+                        </small>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    {% if not user.is_verified_organizer %}
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            <strong>注意:</strong> 主催者認証が完了していないため、大会を作成することができません。
+                            認証が完了するまでお待ちください。
+                        </div>
+                    {% else %}
+                        <!-- フォームガイド -->
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i>
+                            <strong>大会登録ガイド:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>正確な情報を入力してください</li>
+                                <li>申込締切日は開催日より前に設定してください</li>
+                                <li>連絡先情報は参加者が問い合わせできる有効なものを入力してください</li>
+                                <li>大会要項がある場合はURLを記載してください</li>
+                            </ul>
+                        </div>
+
+                        <form method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            {% crispy form %}
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if user.is_verified_organizer %}
+                <!-- ヘルプ情報 -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-question-circle"></i> 入力のヒント
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6><i class="bi bi-pencil"></i> 大会名・概要</h6>
+                                <ul class="small">
+                                    <li>分かりやすく具体的な大会名</li>
+                                    <li>参加対象者が明確になる概要</li>
+                                    <li>特別なルールやテーマがあれば記載</li>
+                                </ul>
+
+                                <h6><i class="bi bi-calendar"></i> 日時</h6>
+                                <ul class="small">
+                                    <li>開催日は正確な日付を入力</li>
+                                    <li>開始時間も可能な限り記載</li>
+                                    <li>申込締切は余裕をもって設定</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6><i class="bi bi-geo-alt"></i> 会場情報</h6>
+                                <ul class="small">
+                                    <li>正式な体育館・施設名</li>
+                                    <li>アクセスしやすい住所表記</li>
+                                    <li>最寄り駅からの距離も併記推奨</li>
+                                </ul>
+
+                                <h6><i class="bi bi-people"></i> 参加情報</h6>
+                                <ul class="small">
+                                    <li>種目は具体的に列挙</li>
+                                    <li>参加費は正確な金額</li>
+                                    <li>定員がある場合は明記</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 日付フィールドの設定
+    const eventDateField = document.querySelector('#id_event_date');
+    const deadlineDateField = document.querySelector('#id_deadline_date');
+    
+    if (eventDateField && deadlineDateField) {
+        // 最小日付を明日に設定
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const tomorrowStr = tomorrow.toISOString().split('T')[0];
+        
+        eventDateField.min = tomorrowStr;
+        deadlineDateField.min = tomorrowStr;
+        
+        // 開催日が変更されたら申込締切日の最大値を調整
+        eventDateField.addEventListener('change', function() {
+            if (this.value) {
+                const eventDate = new Date(this.value);
+                eventDate.setDate(eventDate.getDate() - 1);
+                deadlineDateField.max = eventDate.toISOString().split('T')[0];
+            }
+        });
+        
+        // 申込締切日が変更されたら開催日の最小値を調整
+        deadlineDateField.addEventListener('change', function() {
+            if (this.value) {
+                const deadlineDate = new Date(this.value);
+                deadlineDate.setDate(deadlineDate.getDate() + 1);
+                eventDateField.min = deadlineDate.toISOString().split('T')[0];
+            }
+        });
+    }
+    
+    // 参加費フィールドの数値フォーマット
+    const feeField = document.querySelector('#id_fee');
+    if (feeField) {
+        feeField.addEventListener('input', function() {
+            // 数値以外の文字を削除
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+    }
+    
+    // 文字数カウンター
+    const textareas = document.querySelectorAll('textarea');
+    textareas.forEach(textarea => {
+        const maxLength = textarea.getAttribute('maxlength');
+        if (maxLength) {
+            const counter = document.createElement('div');
+            counter.className = 'text-muted small mt-1';
+            counter.innerHTML = `<span class="char-count">0</span> / ${maxLength} 文字`;
+            textarea.parentNode.appendChild(counter);
+            
+            const charCountSpan = counter.querySelector('.char-count');
+            
+            textarea.addEventListener('input', function() {
+                const currentLength = this.value.length;
+                charCountSpan.textContent = currentLength;
+                
+                if (currentLength > maxLength * 0.9) {
+                    charCountSpan.className = 'text-warning';
+                } else if (currentLength === parseInt(maxLength)) {
+                    charCountSpan.className = 'text-danger';
+                } else {
+                    charCountSpan.className = '';
+                }
+            });
+        }
+    });
+    
+    // フォーム送信前の確認
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const requiredFields = form.querySelectorAll('[required]');
+            let allFilled = true;
+            
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    allFilled = false;
+                }
+            });
+            
+            if (!allFilled) {
+                e.preventDefault();
+                alert('必須項目を全て入力してください。');
+                return false;
+            }
+            
+            // 確認ダイアログ
+            if (!confirm('大会情報を{{ submit_text }}しますか？')) {
+                e.preventDefault();
+                return false;
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

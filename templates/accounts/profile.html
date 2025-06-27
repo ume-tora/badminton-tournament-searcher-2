@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}プロフィール編集 - バドミントン大会サーチ{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- パンくずナビ -->
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'accounts:dashboard' %}">ダッシュボード</a></li>
+                    <li class="breadcrumb-item active">プロフィール編集</li>
+                </ol>
+            </nav>
+
+            <div class="card shadow">
+                <div class="card-header">
+                    <h3 class="mb-0">
+                        <i class="bi bi-person-gear"></i> プロフィール編集
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <!-- ユーザータイプ表示 -->
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i>
+                        <strong>アカウントタイプ:</strong> {{ user.get_user_type_display }}
+                        {% if user.is_organizer and not user.is_verified_organizer %}
+                            <span class="badge bg-warning ms-2">認証待ち</span>
+                        {% elif user.is_organizer and user.is_verified_organizer %}
+                            <span class="badge bg-success ms-2">認証済み</span>
+                        {% endif %}
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        {% crispy form %}
+                    </form>
+                </div>
+            </div>
+
+            <!-- パスワード変更 -->
+            <div class="card shadow mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-key"></i> パスワード変更
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">
+                        セキュリティのため、定期的にパスワードを変更することをお勧めします。
+                    </p>
+                    <a href="{% url 'accounts:password_change' %}" class="btn btn-outline-warning">
+                        <i class="bi bi-shield-lock"></i> パスワードを変更
+                    </a>
+                </div>
+            </div>
+
+            <!-- 主催者向け情報 -->
+            {% if user.is_organizer %}
+                <div class="card shadow mt-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-building"></i> 主催者情報
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if user.is_verified_organizer %}
+                            <div class="alert alert-success">
+                                <i class="bi bi-check-circle"></i>
+                                <strong>認証済み</strong> - 大会の作成・管理が可能です。
+                            </div>
+                        {% else %}
+                            <div class="alert alert-warning">
+                                <i class="bi bi-clock"></i>
+                                <strong>認証待ち</strong> - 運営者による認証が完了するまで、大会の作成はできません。
+                                <hr>
+                                <small>
+                                    認証には以下の情報が確認されます：<br>
+                                    ・団体名の正確性<br>
+                                    ・過去の大会運営実績<br>
+                                    ・連絡先の有効性
+                                </small>
+                            </div>
+                        {% endif %}
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>団体名:</strong> {{ user.organization_name|default:"未設定" }}</p>
+                                <p><strong>ウェブサイト:</strong> 
+                                    {% if user.organization_website %}
+                                        <a href="{{ user.organization_website }}" target="_blank" rel="noopener">
+                                            {{ user.organization_website }}
+                                        </a>
+                                    {% else %}
+                                        未設定
+                                    {% endif %}
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>登録日:</strong> {{ user.date_joined|date:"Y年m月d日" }}</p>
+                                {% if user.is_verified_organizer %}
+                                    <a href="{% url 'tournaments:organizer_tournaments' %}" class="btn btn-primary btn-sm">
+                                        <i class="bi bi-trophy"></i> 私の大会管理
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- アカウント削除 -->
+            <div class="card shadow mt-4 border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-exclamation-triangle"></i> 危険な操作
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-danger">
+                        <strong>アカウント削除について</strong><br>
+                        アカウントを削除すると、お気に入り情報や作成した大会情報が全て失われます。
+                        この操作は取り消すことができません。
+                    </p>
+                    <button type="button" class="btn btn-outline-danger" 
+                            onclick="alert('アカウント削除機能は今後のアップデートで実装予定です。')">
+                        <i class="bi bi-trash"></i> アカウント削除を申請
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
