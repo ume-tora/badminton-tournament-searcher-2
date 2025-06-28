@@ -5,62 +5,80 @@
 
 {% block content %}
 <div class="container">
-    <!-- ヘロセクション -->
+    <!-- ヒーローセクション - 新デザイン -->
     <div class="row mb-5">
         <div class="col-12">
-            <div class="bg-primary text-white rounded p-5 text-center">
-                <h1 class="display-4 fw-bold mb-3">
-                    <i class="bi bi-trophy"></i> バドミントン大会を見つけよう
-                </h1>
-                <p class="lead mb-4">全国のバドミントン大会情報から、あなたにぴったりの大会を検索できます。</p>
-                
-                <!-- 簡単検索フォーム -->
-                <form method="get" class="row g-2 justify-content-center">
-                    <div class="col-md-8">
-                        <input type="text" name="q" class="form-control form-control-lg" 
-                               placeholder="大会名、会場名、地域名で検索..." 
-                               value="{{ request.GET.q }}">
+            <div class="hero-card card glass-effect p-5 text-center fade-in">
+                <div class="card-body p-4">
+                    <h1 class="display-3 fw-bold mb-4 gradient-text">
+                        <i class="bi bi-trophy me-3"></i>バドミントン大会を見つけよう
+                    </h1>
+                    <p class="lead mb-5 text-muted fs-4">全国のバドミントン大会情報から、あなたにぴったりの大会を検索できます。</p>
+                    
+                    <!-- エレガント検索フォーム -->
+                    <form method="get" class="row g-3 justify-content-center">
+                        <div class="col-md-8">
+                            <div class="position-relative">
+                                <input type="text" name="q" class="form-control form-control-lg glass-effect" 
+                                       placeholder="🏸 大会名、会場名、地域名で検索..." 
+                                       value="{{ request.GET.q }}"
+                                       style="padding-left: 3rem;">
+                                <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <button type="submit" class="btn btn-accent btn-lg w-100 shadow">
+                                <i class="bi bi-search me-2"></i>検索開始
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <!-- クイックアクセス -->
+                    <div class="mt-4">
+                        <div class="row g-2 justify-content-center">
+                            <div class="col-auto">
+                                <a href="{% url 'tournaments:tournament_search' %}" class="btn btn-glass btn-sm">
+                                    <i class="bi bi-funnel me-1"></i>詳細検索
+                                </a>
+                            </div>
+                            <div class="col-auto">
+                                <a href="{% url 'tournaments:tournament_calendar' %}" class="btn btn-glass btn-sm">
+                                    <i class="bi bi-calendar me-1"></i>カレンダー
+                                </a>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-md-2">
-                        <button type="submit" class="btn btn-light btn-lg w-100">
-                            <i class="bi bi-search"></i> 検索
-                        </button>
-                    </div>
-                </form>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- 統計情報 -->
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <div class="card text-center">
-                <div class="card-body">
-                    <i class="bi bi-trophy text-primary" style="font-size: 2rem;"></i>
-                    <h3 class="mt-2">{{ total_tournaments }}</h3>
-                    <p class="text-muted mb-0">登録大会数</p>
-                </div>
+    <div class="row mb-5">
+        <div class="col-md-6 mb-3">
+            <div class="stats-card hover-lift fade-in">
+                <i class="bi bi-trophy" style="font-size: 2.5rem; color: var(--primary-light);"></i>
+                <div class="stats-number mt-3">{{ total_tournaments }}</div>
+                <p class="text-muted mb-0 fw-semibold">登録大会数</p>
             </div>
         </div>
-        <div class="col-md-6">
-            <div class="card text-center">
-                <div class="card-body">
-                    <i class="bi bi-calendar-event text-success" style="font-size: 2rem;"></i>
-                    <h3 class="mt-2">{{ upcoming_tournaments }}</h3>
-                    <p class="text-muted mb-0">開催予定大会</p>
-                </div>
+        <div class="col-md-6 mb-3">
+            <div class="stats-card hover-lift fade-in">
+                <i class="bi bi-calendar-event" style="font-size: 2.5rem; color: var(--accent-orange);"></i>
+                <div class="stats-number mt-3">{{ upcoming_tournaments }}</div>
+                <p class="text-muted mb-0 fw-semibold">開催予定大会</p>
             </div>
         </div>
     </div>
 
     <!-- フィルター -->
-    <div class="row mb-4">
+    <div class="row mb-5">
         <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="bi bi-funnel"></i> 絞り込み検索
-                        <button class="btn btn-sm btn-outline-primary float-end" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse">
+            <div class="card glass-effect">
+                <div class="card-header" style="background: var(--primary-gradient); color: var(--pure-white);">
+                    <h5 class="mb-0 d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-funnel me-2"></i> 絞り込み検索</span>
+                        <button class="btn btn-sm btn-glass" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse">
                             <i class="bi bi-chevron-down"></i>
                         </button>
                     </h5>
@@ -97,12 +115,12 @@
                                     <input type="date" name="date_to" class="form-control" value="{{ request.GET.date_to }}">
                                 </div>
                             </div>
-                            <div class="mt-3">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="bi bi-search"></i> 検索
+                            <div class="mt-4">
+                                <button type="submit" class="btn btn-primary btn-lg me-3">
+                                    <i class="bi bi-search me-2"></i> 検索
                                 </button>
-                                <a href="{% url 'tournaments:tournament_list' %}" class="btn btn-outline-secondary">
-                                    <i class="bi bi-arrow-clockwise"></i> リセット
+                                <a href="{% url 'tournaments:tournament_list' %}" class="btn btn-glass">
+                                    <i class="bi bi-arrow-clockwise me-2"></i> リセット
                                 </a>
                             </div>
                         </form>
@@ -116,7 +134,7 @@
     <div class="row">
         {% for tournament in tournaments %}
             <div class="col-lg-4 col-md-6 mb-4">
-                <div class="card h-100">
+                <div class="card h-100 hover-lift slide-up">
                     {% if tournament.images.all %}
                         <img src="{{ tournament.images.first.image.url }}" class="card-img-top" alt="{{ tournament.name }}" style="height: 200px; object-fit: cover;">
                     {% else %}
@@ -144,33 +162,33 @@
                         </div>
                         
                         <div class="mb-2">
-                            <span class="badge bg-primary">{{ tournament.get_level_display }}</span>
-                            <span class="badge bg-secondary">{{ tournament.prefecture }}</span>
+                            <span class="badge badge-primary">{{ tournament.get_level_display }}</span>
+                            <span class="badge badge-accent">{{ tournament.prefecture }}</span>
                         </div>
                         
                         <div class="mb-3">
-                            <strong class="text-primary">参加費: ¥{{ tournament.fee|floatformat:0 }}</strong>
+                            <strong class="gradient-text fs-5">参加費: ¥{{ tournament.fee|floatformat:0 }}</strong>
                         </div>
                         
                         <!-- 申込状況 -->
                         {% if tournament.is_registration_open %}
-                            <div class="alert alert-success alert-sm mb-2">
-                                <i class="bi bi-check-circle"></i> 
+                            <div class="alert alert-success mb-2">
+                                <i class="bi bi-check-circle me-2"></i> 
                                 申込受付中 (締切まで{{ tournament.days_until_deadline }}日)
                             </div>
                         {% else %}
-                            <div class="alert alert-secondary alert-sm mb-2">
-                                <i class="bi bi-x-circle"></i> 申込締切済み
+                            <div class="alert alert-info mb-2">
+                                <i class="bi bi-x-circle me-2"></i> 申込締切済み
                             </div>
                         {% endif %}
                         
-                        <div class="mt-auto">
-                            <a href="{% url 'tournaments:tournament_detail' tournament.pk %}" class="btn btn-primary btn-sm me-2">
-                                <i class="bi bi-eye"></i> 詳細を見る
+                        <div class="mt-auto d-flex gap-2">
+                            <a href="{% url 'tournaments:tournament_detail' tournament.pk %}" class="btn btn-primary flex-grow-1">
+                                <i class="bi bi-eye me-2"></i> 詳細を見る
                             </a>
                             
                             {% if user.is_authenticated %}
-                                <button class="btn btn-outline-danger btn-sm favorite-btn" 
+                                <button class="btn btn-glass favorite-btn" 
                                         data-tournament-id="{{ tournament.pk }}"
                                         data-is-favorited="false">
                                     <i class="bi bi-heart"></i>
@@ -182,13 +200,15 @@
             </div>
         {% empty %}
             <div class="col-12">
-                <div class="text-center py-5">
-                    <i class="bi bi-search text-muted" style="font-size: 4rem;"></i>
-                    <h3 class="mt-3 text-muted">大会が見つかりませんでした</h3>
-                    <p class="text-muted">検索条件を変更してもう一度お試しください。</p>
-                    <a href="{% url 'tournaments:tournament_list' %}" class="btn btn-primary">
-                        すべての大会を見る
-                    </a>
+                <div class="card glass-effect text-center py-5 fade-in">
+                    <div class="card-body">
+                        <i class="bi bi-search" style="font-size: 4rem; color: var(--primary-light);"></i>
+                        <h3 class="mt-4 gradient-text">大会が見つかりませんでした</h3>
+                        <p class="text-muted fs-5 mb-4">検索条件を変更してもう一度お試しください。</p>
+                        <a href="{% url 'tournaments:tournament_list' %}" class="btn btn-accent btn-lg">
+                            <i class="bi bi-arrow-clockwise me-2"></i>すべての大会を見る
+                        </a>
+                    </div>
                 </div>
             </div>
         {% endfor %}
@@ -196,27 +216,27 @@
 
     <!-- ページネーション -->
     {% if is_paginated %}
-        <nav aria-label="大会一覧ページネーション">
+        <nav aria-label="大会一覧ページネーション" class="mt-5">
             <ul class="pagination justify-content-center">
                 {% if page_obj.has_previous %}
                     <li class="page-item">
-                        <a class="page-link" href="?page=1{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">最初</a>
+                        <a class="page-link glass-effect" href="?page=1{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">最初</a>
                     </li>
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">前へ</a>
+                        <a class="page-link glass-effect" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">前へ</a>
                     </li>
                 {% endif %}
                 
                 <li class="page-item active">
-                    <span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+                    <span class="page-link" style="background: var(--primary-gradient); border-color: var(--primary-light);">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
                 </li>
                 
                 {% if page_obj.has_next %}
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">次へ</a>
+                        <a class="page-link glass-effect" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">次へ</a>
                     </li>
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">最後</a>
+                        <a class="page-link glass-effect" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">最後</a>
                     </li>
                 {% endif %}
             </ul>

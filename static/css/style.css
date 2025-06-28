@@ -1,247 +1,369 @@
-/* バドミントン大会サーチサイト カスタムCSS */
+/* バドミントン大会サーチサイト - モダン・スポーティー・プロフェッショナル デザイン */
 
 :root {
-    --primary-color: #0066cc;
-    --secondary-color: #ff6b35;
+    /* バドミントンコートをイメージしたグリーン系グラデーション */
+    --primary-gradient: linear-gradient(135deg, #2E8B57 0%, #32CD32 50%, #228B22 100%);
+    --primary-light: #32CD32;
+    --primary-dark: #228B22;
+    --primary-shadow: rgba(46, 139, 87, 0.3);
+    
+    /* エネルギッシュなアクセントカラー */
+    --accent-orange: #FF8C00;
+    --accent-yellow: #FFD700;
+    --accent-gradient: linear-gradient(135deg, #FF8C00 0%, #FFD700 100%);
+    
+    /* プロフェッショナルなベースカラー */
+    --dark-navy: #1e2a3a;
+    --light-navy: #2c3e50;
+    --soft-white: #fafbfc;
+    --pure-white: #ffffff;
+    
+    /* グラスモーフィズム */
+    --glass-bg: rgba(255, 255, 255, 0.15);
+    --glass-border: rgba(255, 255, 255, 0.2);
+    --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    
+    /* セマンティックカラー */
     --success-color: #28a745;
     --warning-color: #ffc107;
     --danger-color: #dc3545;
-    --light-color: #f8f9fa;
-    --dark-color: #343a40;
+    --info-color: #17a2b8;
+    
+    /* 影とエフェクト */
+    --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    --card-hover-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+    --soft-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
 }
 
-/* 全体のスタイル */
+/* 全体のリセットとベース */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Inter', 'Segoe UI', 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
     line-height: 1.6;
+    color: var(--dark-navy);
+    background: linear-gradient(135deg, var(--soft-white) 0%, #f0f8f5 50%, #e8f5e8 100%);
+    min-height: 100vh;
 }
 
-/* ナビゲーション */
+/* スムーズなスクロール */
+html {
+    scroll-behavior: smooth;
+}
+
+/* =============================================
+   ナビゲーション - スポーティー × プロフェッショナル
+============================================= */
+.navbar {
+    background: var(--primary-gradient) !important;
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    padding: 1rem 0;
+    transition: all 0.3s ease;
+}
+
 .navbar-brand {
-    font-size: 1.5rem;
+    font-size: 1.8rem;
+    font-weight: 800;
+    background: linear-gradient(45deg, var(--pure-white), var(--accent-yellow));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.navbar-brand:hover {
+    transform: scale(1.05);
+    filter: brightness(1.1);
 }
 
 .navbar-nav .nav-link {
-    font-weight: 500;
-    transition: color 0.3s ease;
+    color: rgba(255, 255, 255, 0.95) !important;
+    font-weight: 600;
+    padding: 0.7rem 1.2rem !important;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.navbar-nav .nav-link:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: var(--glass-bg);
+    transition: left 0.3s ease;
+    z-index: -1;
+}
+
+.navbar-nav .nav-link:hover:before {
+    left: 0;
 }
 
 .navbar-nav .nav-link:hover {
-    color: #fff !important;
-}
-
-/* カード */
-.card {
-    border: none;
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-    transition: box-shadow 0.15s ease-in-out, transform 0.15s ease-in-out;
-}
-
-.card:hover {
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    color: var(--pure-white) !important;
     transform: translateY(-2px);
+    box-shadow: var(--soft-shadow);
 }
 
-.card-img-top {
+/* ドロップダウンメニュー */
+.dropdown-menu {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 15px;
+    box-shadow: var(--glass-shadow);
+    padding: 1rem 0;
+}
+
+.dropdown-item {
+    color: var(--dark-navy);
+    font-weight: 500;
+    padding: 0.7rem 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.dropdown-item:hover {
+    background: var(--primary-light);
+    color: var(--pure-white);
+    transform: translateX(5px);
+}
+
+/* =============================================
+   カードデザイン - グラスモーフィズム × 高級感
+============================================= */
+.card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    box-shadow: var(--card-shadow);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    position: relative;
+}
+
+.card:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--primary-gradient);
+    transform: scaleX(0);
     transition: transform 0.3s ease;
 }
 
-.card:hover .card-img-top {
-    transform: scale(1.05);
+.card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: var(--card-hover-shadow);
 }
 
-/* ボタン */
+.card:hover:before {
+    transform: scaleX(1);
+}
+
+.card-header {
+    background: var(--primary-gradient);
+    color: var(--pure-white);
+    border-bottom: none;
+    padding: 1.5rem;
+    font-weight: 700;
+}
+
+.card-body {
+    padding: 2rem;
+}
+
+/* 特別なカード（ヒーローセクション） */
+.hero-card {
+    background: linear-gradient(135deg, 
+        rgba(46, 139, 87, 0.1) 0%, 
+        rgba(50, 205, 50, 0.1) 50%, 
+        rgba(34, 139, 34, 0.1) 100%);
+    border: 2px solid var(--glass-border);
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-card:before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    animation: shimmer 6s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* =============================================
+   ボタンデザイン - エネルギッシュ × 上質
+============================================= */
 .btn {
-    border-radius: 0.375rem;
-    font-weight: 500;
-    transition: all 0.3s ease;
+    border-radius: 25px;
+    font-weight: 600;
+    padding: 0.8rem 2rem;
+    border: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s ease;
+}
+
+.btn:hover:before {
+    left: 100%;
 }
 
 .btn-primary {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
+    background: var(--primary-gradient);
+    color: var(--pure-white);
+    box-shadow: 0 4px 15px var(--primary-shadow);
 }
 
 .btn-primary:hover {
-    background-color: #0056b3;
-    border-color: #0056b3;
-    transform: translateY(-1px);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px var(--primary-shadow);
+    filter: brightness(1.1);
 }
 
-/* アラート */
-.alert {
-    border-radius: 0.5rem;
-    border: none;
+.btn-accent {
+    background: var(--accent-gradient);
+    color: var(--pure-white);
+    box-shadow: 0 4px 15px rgba(255, 140, 0, 0.3);
 }
 
-.alert-sm {
-    padding: 0.375rem 0.75rem;
-    font-size: 0.875rem;
+.btn-accent:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(255, 140, 0, 0.4);
 }
 
-/* バッジ */
-.badge {
-    font-weight: 500;
-    padding: 0.375rem 0.75rem;
+.btn-glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    color: var(--dark-navy);
 }
 
-/* フォーム */
+.btn-glass:hover {
+    background: var(--primary-light);
+    color: var(--pure-white);
+    transform: translateY(-3px);
+}
+
+/* =============================================
+   フォームデザイン - モダン × 機能的
+============================================= */
 .form-control {
-    border-radius: 0.375rem;
-    border: 1px solid #ced4da;
-    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-}
-
-.form-control:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 0.2rem rgba(0, 102, 204, 0.25);
-}
-
-/* ヒーローセクション */
-.hero-section {
-    background: linear-gradient(135deg, var(--primary-color) 0%, #004499 100%);
-    color: white;
-    padding: 4rem 0;
-}
-
-/* 統計カード */
-.stats-card {
-    background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
-    border-radius: 1rem;
-    padding: 2rem;
-    text-align: center;
-    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
-}
-
-.stats-card h3 {
-    color: var(--primary-color);
-    font-weight: bold;
-    margin: 1rem 0 0.5rem 0;
-}
-
-/* お気に入りボタン */
-.favorite-btn {
+    border-radius: 15px;
+    border: 2px solid var(--glass-border);
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    padding: 1rem 1.5rem;
+    font-weight: 500;
     transition: all 0.3s ease;
 }
 
-.favorite-btn:hover {
-    transform: scale(1.1);
+.form-control:focus {
+    border-color: var(--primary-light);
+    box-shadow: 0 0 0 0.2rem var(--primary-shadow);
+    background: var(--pure-white);
+    transform: translateY(-2px);
 }
 
-/* 大会カード */
-.tournament-card {
-    overflow: hidden;
-    border-radius: 1rem;
+.form-label {
+    font-weight: 600;
+    color: var(--dark-navy);
+    margin-bottom: 0.8rem;
 }
 
-.tournament-card .card-body {
+/* =============================================
+   バッジとアラート - 情報の視覚化
+============================================= */
+.badge {
+    padding: 0.6rem 1.2rem;
+    border-radius: 20px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.badge-primary {
+    background: var(--primary-gradient);
+    color: var(--pure-white);
+}
+
+.badge-accent {
+    background: var(--accent-gradient);
+    color: var(--pure-white);
+}
+
+.alert {
+    border-radius: 15px;
+    border: none;
     padding: 1.5rem;
-}
-
-.tournament-status {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    z-index: 10;
-}
-
-/* フッター */
-footer {
-    margin-top: auto;
-}
-
-footer a {
-    transition: color 0.3s ease;
-}
-
-footer a:hover {
-    color: var(--secondary-color) !important;
-}
-
-/* レスポンシブ調整 */
-@media (max-width: 768px) {
-    .display-4 {
-        font-size: 2rem;
-    }
-    
-    .card-body {
-        padding: 1rem;
-    }
-    
-    .btn-lg {
-        padding: 0.75rem 1.5rem;
-        font-size: 1rem;
-    }
-}
-
-/* 検索フォーム */
-.search-form {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 1rem;
-    padding: 2rem;
+    font-weight: 500;
     backdrop-filter: blur(10px);
 }
 
-/* ローディングアニメーション */
-.loading {
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    border: 3px solid rgba(255, 255, 255, 0.3);
-    border-radius: 50%;
-    border-top-color: #fff;
-    animation: spin 1s ease-in-out infinite;
+.alert-success {
+    background: rgba(40, 167, 69, 0.1);
+    color: var(--success-color);
+    border: 1px solid rgba(40, 167, 69, 0.2);
 }
 
-@keyframes spin {
-    to { transform: rotate(360deg); }
+.alert-warning {
+    background: rgba(255, 193, 7, 0.1);
+    color: #856404;
+    border: 1px solid rgba(255, 193, 7, 0.2);
 }
 
-/* 成功メッセージのアニメーション */
-.alert {
-    animation: slideInDown 0.5s ease-out;
+.alert-info {
+    background: rgba(23, 162, 184, 0.1);
+    color: var(--info-color);
+    border: 1px solid rgba(23, 162, 184, 0.2);
 }
 
-@keyframes slideInDown {
-    from {
-        transform: translate3d(0, -100%, 0);
-        visibility: visible;
-    }
-    to {
-        transform: translate3d(0, 0, 0);
-    }
-}
-
-/* ホバーエフェクト */
-.hover-shadow {
-    transition: box-shadow 0.3s ease;
-}
-
-.hover-shadow:hover {
-    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175);
-}
-
-/* カスタムスクロールバー */
-::-webkit-scrollbar {
-    width: 8px;
-}
-
-::-webkit-scrollbar-track {
-    background: #f1f1f1;
-}
-
-::-webkit-scrollbar-thumb {
-    background: var(--primary-color);
-    border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: #0056b3;
-}
-
-/* フェードインアニメーション */
+/* =============================================
+   アニメーションとトランジション
+============================================= */
 .fade-in {
-    animation: fadeIn 0.6s ease-in;
+    animation: fadeIn 0.8s ease-out;
+}
+
+.slide-up {
+    animation: slideUp 0.6s ease-out;
+}
+
+.bounce-in {
+    animation: bounceIn 0.8s ease-out;
 }
 
 @keyframes fadeIn {
@@ -249,14 +371,238 @@ footer a:hover {
     to { opacity: 1; }
 }
 
-/* スポーティなアクセント */
-.accent-border {
-    border-left: 4px solid var(--secondary-color);
+@keyframes slideUp {
+    from { 
+        opacity: 0; 
+        transform: translateY(30px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
 }
 
-.text-gradient {
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+@keyframes bounceIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.3);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+    70% {
+        transform: scale(0.9);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* =============================================
+   ローディングとインタラクション
+============================================= */
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--glass-border);
+    border-top: 4px solid var(--primary-light);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ホバーエフェクト */
+.hover-lift {
+    transition: all 0.3s ease;
+}
+
+.hover-lift:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--card-hover-shadow);
+}
+
+/* =============================================
+   ステータス表示 - 大会情報
+============================================= */
+.status-open {
+    background: linear-gradient(135deg, var(--success-color), #20c997);
+    color: white;
+    animation: pulse 2s infinite;
+}
+
+.status-warning {
+    background: linear-gradient(135deg, var(--warning-color), #fd7e14);
+    color: white;
+    animation: pulse 2s infinite;
+}
+
+.status-closed {
+    background: linear-gradient(135deg, #6c757d, #495057);
+    color: white;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
+}
+
+/* =============================================
+   統計カード - ダッシュボード用
+============================================= */
+.stats-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.stats-card:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--primary-gradient);
+}
+
+.stats-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--card-hover-shadow);
+}
+
+.stats-number {
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: var(--primary-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+}
+
+/* =============================================
+   フッター - プロフェッショナル
+============================================= */
+footer {
+    background: linear-gradient(135deg, var(--dark-navy) 0%, var(--light-navy) 100%);
+    color: var(--soft-white);
+    margin-top: 4rem;
+    position: relative;
+}
+
+footer:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--primary-gradient);
+}
+
+footer a {
+    color: var(--soft-white);
+    transition: all 0.3s ease;
+}
+
+footer a:hover {
+    color: var(--primary-light);
+    transform: translateX(5px);
+}
+
+/* =============================================
+   レスポンシブデザイン
+============================================= */
+@media (max-width: 768px) {
+    .navbar-brand {
+        font-size: 1.4rem;
+    }
+    
+    .card-body {
+        padding: 1.5rem;
+    }
+    
+    .btn {
+        padding: 0.7rem 1.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .stats-number {
+        font-size: 2rem;
+    }
+    
+    .hero-card {
+        margin: 1rem 0;
+    }
+}
+
+@media (max-width: 576px) {
+    .card {
+        border-radius: 15px;
+        margin: 0.5rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+}
+
+/* =============================================
+   特殊効果 - 高級感演出
+============================================= */
+.glass-effect {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+}
+
+.gradient-text {
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700;
+}
+
+.accent-text {
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700;
+}
+
+/* パーティクル効果のベース */
+.particle-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* スクロール時のパララックス効果 */
+.parallax {
+    transform: translateZ(0);
+    transition: transform 0.1s ease-out;
 }
