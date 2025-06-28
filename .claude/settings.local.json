@@ -15,7 +15,8 @@
       "Bash(python manage.py load_sample_data:*)",
       "Bash(chmod:*)",
       "Bash(touch:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "WebFetch(domain:badminton-tournament-searcher-2-1.vercel.app)"
     ],
     "deny": []
   }

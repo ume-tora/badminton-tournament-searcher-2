@@ -1,0 +1,7 @@
+{
+  "name": "badminton-tournament-searcher",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "./build.sh"
+  }
+}
