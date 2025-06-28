@@ -12,7 +12,9 @@
       "Bash(git remote add:*)",
       "Bash(git push:*)",
       "Bash(git add:*)",
-      "Bash(python manage.py load_sample_data:*)"
+      "Bash(python manage.py load_sample_data:*)",
+      "Bash(chmod:*)",
+      "Bash(touch:*)"
     ],
     "deny": []
   }
