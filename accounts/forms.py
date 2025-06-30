@@ -45,11 +45,31 @@ class UserRegistrationForm(UserCreationForm):
         widget=forms.URLInput(attrs={'class': 'form-control'})
     )
     
+    # 法的同意フィールド
+    privacy_policy_agreed = forms.BooleanField(
+        required=True,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        label='プライバシーポリシーに同意する',
+        error_messages={
+            'required': 'プライバシーポリシーへの同意が必要です。'
+        }
+    )
+    
+    terms_agreed = forms.BooleanField(
+        required=True,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        label='利用規約に同意する',
+        error_messages={
+            'required': '利用規約への同意が必要です。'
+        }
+    )
+    
     class Meta:
         model = User
         fields = [
             'username', 'email', 'password1', 'password2', 'user_type',
-            'phone_number', 'prefecture', 'organization_name', 'organization_website'
+            'phone_number', 'prefecture', 'organization_name', 'organization_website',
+            'privacy_policy_agreed', 'terms_agreed'
         ]
     
     def __init__(self, *args, **kwargs):
@@ -79,7 +99,21 @@ class UserRegistrationForm(UserCreationForm):
                 css_id='organizer-fields',
                 css_class='organizer-only'
             ),
-            Submit('submit', '登録', css_class='btn btn-primary btn-lg w-100')
+            Div(
+                HTML('<h5 class="mt-4 mb-3">利用規約・プライバシーポリシーへの同意</h5>'),
+                Div(
+                    Field('terms_agreed', wrapper_class='form-check'),
+                    HTML('<small class="form-text text-muted"><a href="/legal/terms/" target="_blank">利用規約を確認する</a></small>'),
+                    css_class='mb-3'
+                ),
+                Div(
+                    Field('privacy_policy_agreed', wrapper_class='form-check'),
+                    HTML('<small class="form-text text-muted"><a href="/legal/privacy/" target="_blank">プライバシーポリシーを確認する</a></small>'),
+                    css_class='mb-3'
+                ),
+                css_class='border p-3 rounded bg-light'
+            ),
+            Submit('submit', '登録', css_class='btn btn-primary btn-lg w-100 mt-3')
         )
     
     def clean_email(self):
@@ -100,6 +134,8 @@ class UserRegistrationForm(UserCreationForm):
         return cleaned_data
     
     def save(self, commit=True):
+        from django.utils import timezone
+        
         user = super().save(commit=False)
         user.email = self.cleaned_data['email']
         user.user_type = self.cleaned_data['user_type']
@@ -107,6 +143,15 @@ class UserRegistrationForm(UserCreationForm):
         user.prefecture = self.cleaned_data.get('prefecture', '')
         user.organization_name = self.cleaned_data.get('organization_name', '')
         user.organization_website = self.cleaned_data.get('organization_website', '')
+        
+        # 同意記録の保存
+        if self.cleaned_data.get('privacy_policy_agreed'):
+            user.privacy_policy_agreed = True
+            user.privacy_policy_agreed_at = timezone.now()
+        
+        if self.cleaned_data.get('terms_agreed'):
+            user.terms_agreed = True
+            user.terms_agreed_at = timezone.now()
         
         if commit:
             user.save()

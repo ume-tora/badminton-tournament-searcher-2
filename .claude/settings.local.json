@@ -16,7 +16,9 @@
       "Bash(chmod:*)",
       "Bash(touch:*)",
       "Bash(rm:*)",
-      "WebFetch(domain:badminton-tournament-searcher-2-1.vercel.app)"
+      "WebFetch(domain:badminton-tournament-searcher-2-1.vercel.app)",
+      "Bash(grep:*)",
+      "Bash(python manage.py:*)"
     ],
     "deny": []
   }

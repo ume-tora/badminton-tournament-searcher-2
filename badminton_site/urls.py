@@ -22,6 +22,7 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('accounts.urls')),
+    path('legal/', include('badminton_site.legal_urls')),
     path('tournaments/', include('tournaments.urls')),
     path('', include('tournaments.urls')),  # Root URL points to tournaments
 ]

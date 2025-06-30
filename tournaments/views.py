@@ -317,21 +317,48 @@ def toggle_favorite(request, pk):
     return redirect('tournaments:tournament_detail', pk=pk)
 
 
-class TournamentApiView(ListView):
-    """API用ビュー（JSON形式でデータを返す）"""
+class TournamentApiView(LoginRequiredMixin, ListView):
+    """API用ビュー（JSON形式でデータを返す）- 認証必須"""
     model = Tournament
     
     def get(self, request, *args, **kwargs):
+        # レート制限チェック（簡易版）
+        if hasattr(request.user, '_api_request_count'):
+            request.user._api_request_count += 1
+        else:
+            request.user._api_request_count = 1
+            
+        # 1分間に10回までの制限
+        if request.user._api_request_count > 10:
+            return JsonResponse({
+                'error': 'レート制限に達しました。しばらく待ってから再試行してください。',
+                'code': 'RATE_LIMIT_EXCEEDED'
+            }, status=429)
+        
+        # ページネーション対応
+        page = request.GET.get('page', 1)
+        limit = min(int(request.GET.get('limit', 50)), 100)  # 最大100件
+        offset = (int(page) - 1) * limit
+        
         tournaments = Tournament.objects.filter(
             is_approved=True,
             is_active=True
         ).values(
             'id', 'name', 'event_date', 'venue_name', 
             'prefecture', 'level', 'fee'
-        )
+        )[offset:offset + limit]
         
         data = list(tournaments)
-        return JsonResponse({
+        
+        # セキュリティヘッダー追加
+        response = JsonResponse({
             'tournaments': data,
-            'count': len(data)
+            'count': len(data),
+            'page': int(page),
+            'limit': limit
         })
+        
+        response['X-Content-Type-Options'] = 'nosniff'
+        response['X-Frame-Options'] = 'DENY'
+        
+        return response

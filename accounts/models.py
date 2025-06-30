@@ -58,6 +58,44 @@ class User(AbstractUser):
         verbose_name='団体ウェブサイト'
     )
     
+    # 法的同意記録
+    privacy_policy_agreed = models.BooleanField(
+        default=False,
+        verbose_name='プライバシーポリシー同意',
+        help_text='個人情報保護法に基づく同意記録'
+    )
+    
+    privacy_policy_agreed_at = models.DateTimeField(
+        blank=True,
+        null=True,
+        verbose_name='プライバシーポリシー同意日時'
+    )
+    
+    terms_agreed = models.BooleanField(
+        default=False,
+        verbose_name='利用規約同意',
+        help_text='サービス利用規約への同意記録'
+    )
+    
+    terms_agreed_at = models.DateTimeField(
+        blank=True,
+        null=True,
+        verbose_name='利用規約同意日時'
+    )
+    
+    # データ削除要求記録
+    data_deletion_requested = models.BooleanField(
+        default=False,
+        verbose_name='データ削除要求',
+        help_text='GDPR対応：忘れられる権利の行使記録'
+    )
+    
+    data_deletion_requested_at = models.DateTimeField(
+        blank=True,
+        null=True,
+        verbose_name='データ削除要求日時'
+    )
+
     # 管理用
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='登録日時')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='更新日時')
@@ -87,3 +125,14 @@ class User(AbstractUser):
         if self.organization_name and self.is_organizer():
             return self.organization_name
         return self.username
+    
+    def has_valid_consent(self):
+        """有効な同意があるかどうかを判定"""
+        return self.privacy_policy_agreed and self.terms_agreed
+    
+    def request_data_deletion(self):
+        """データ削除要求を記録（GDPR対応）"""
+        from django.utils import timezone
+        self.data_deletion_requested = True
+        self.data_deletion_requested_at = timezone.now()
+        self.save()
